@@ -14,23 +14,47 @@ router.get('/', async(req, res)=>{
     }
 })
 
+router.post('/', async (req, res) => {
+  console.log('Received POST request to /api/bookmarks');
+  console.log('Request body:', JSON.stringify(req.body, null, 2));
+  console.log('Request headers:', JSON.stringify(req.headers, null, 2));
+  
+  const { title, url, description, tags, source, userId } = req.body;
 
-router.post('/', async(req, res)=>{
-    const bookmark=new Bookmark({
-       title: req.body.title,
-       url: req.body.url,
-       description: req.body.description,
-       tags: req.body.tags,
-       source:req.body.source,
-       userId:req.body.userId,
-    })
+  console.log('Extracted fields:', { title, url, description, tags, source, userId });
 
-    try {
-        const newBookmark = await bookmark.save()
-       res.status(201).json(newBookmark) 
-    } catch (error) {
-       res.status(400).json({message:error.message}) 
-    }
+  // Detailed validation
+  const missingFields = [];
+  if (!title) missingFields.push('title');
+  if (!url) missingFields.push('url');
+  if (!userId) missingFields.push('userId');
+
+  if (missingFields.length > 0) {
+      console.log('Validation failed. Missing fields:', missingFields);
+      return res.status(400).json({ 
+          message: 'Title, URL, and userId are required',
+          missingFields: missingFields
+      });
+  }
+
+  const bookmark = new Bookmark({
+      title,
+      url,
+      description,
+      tags,
+      source,
+      userId,
+  })
+
+  try {
+      console.log('Attempting to save bookmark:', bookmark);
+      const newBookmark = await bookmark.save()
+      console.log('Bookmark saved successfully:', newBookmark);
+      res.status(201).json(newBookmark)
+  } catch (error) {
+      console.error('Error saving bookmark:', error);
+      res.status(400).json({ message: error.message, details: error })
+  }
 })
 
 // get the specific bookmark

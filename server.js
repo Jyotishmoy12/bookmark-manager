@@ -22,6 +22,8 @@ app.get('/', (req, res)=>{
 })
 
 app.use('/api/bookmarks', require('./routes/bookmarks'))
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/bookmarks', require('./middleware/auth'), require('./routes/bookmarks'));
 
 app.listen(PORT, ()=>{
    console.log(`Server is running on port ${PORT}`)
